@@ -1,0 +1,101 @@
+import random
+import numpy as np
+
+
+class GridWorld():
+    def __init__(self):
+        self.result = []
+        self.x_history = np.zeros(6)
+        self.counter = 0
+
+    def step(self, a):
+        # 0번 액션: 왼쪽, 1번 액션: 오른쪽
+        if a == 0:
+            reward = -1
+        elif a == 1:
+            reward = +1
+
+        self.x_history.append(a)
+        self.counter += 1
+
+        done = self.is_done()
+
+        return self.x_history, reward, done
+
+    def is_done(self):
+        if len(self.x_history) == 6:
+            return True
+        else:
+            return False
+
+    def reset(self):
+        self.x_history = np.zeros(6)
+        self.counter = 0
+        return self.x_history
+
+
+class QAgent():
+    def __init__(self):
+        self.q_table = np.zeros((3, 3, 3, 3, 3, 3))  # 마찬가지로 Q 테이블을 0으로 초기화
+        self.eps = 0.9
+
+    def select_action(self, s):
+        # eps-greedy로 액션을 선택해준다
+        num = 0
+        x = s
+        coin = random.random()
+        if coin < self.eps:
+            action = random.randint(0, 1)
+        else:
+            for i in x:
+                if i !=0:
+                    num += 1
+
+
+            a,b,c,d,e,f = x
+            action_val = self.q_table[a,b,c,d,e,f :]
+            action = np.argmax(action_val)
+        return action
+
+    def update_table(self, transition):
+        s, a, r, s_prime = transition
+        # Q러닝 업데이트 식을 이용
+        self.q_table[s, a] = self.q_table[s, a] + 0.1 * (
+                    r + np.amax(self.q_table[s_prime, :]) - self.q_table[s, a])
+
+    def anneal_eps(self):
+        self.eps -= 0.01  # Q러닝에선 epsilon 이 좀더 천천히 줄어 들도록 함.
+        self.eps = max(self.eps, 0.2)
+
+    def show_table(self):
+        q_lst = self.q_table.tolist()
+        data = [0,0,0,0,0,0]
+        for idx in range(len(q_lst)):
+            row = q_lst[idx]
+            action = np.argmax(row)
+            data[idx] = action
+        print(data)
+
+
+def main():
+    env = GridWorld()
+    agent = QAgent()
+
+    for n_epi in range(1000):
+        done = False
+        s = env.reset()
+
+        while not done:
+            a = agent.select_action(s)
+            s_prime, r, done = env.step(a)
+            agent.update_table((s, a, r, s_prime))
+            s = s_prime
+        agent.anneal_eps()
+        if env.x_history == [0,1,0,1,0,0]:
+            agent.q_table[5, 0] += 1000
+        env.result.append(env.x_history)
+        print(env.result)
+
+
+if __name__ == '__main__':
+    main()
