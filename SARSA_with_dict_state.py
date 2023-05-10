@@ -17,8 +17,7 @@ class GridWorld():
 
         self.x_history.append(a)
         self.counter += 1
-
-        s = tuple(self.x_history)
+        
         done = self.is_done()
 
         return self.x_history, reward, done
