@@ -11,7 +11,11 @@ class GridWorld():
     def step(self, a):
         # 1번 액션: 왼쪽, 2번 액션: 오른쪽
         if a == 0:
-            reward = -1
+            if self.x_history == [0, 1, 0, 1, 0]:
+                reward = 1000
+            else:
+                reward = -1
+                
         elif a == 1:
             reward = +1
 
@@ -53,7 +57,6 @@ class QAgent():
 
         self.q_table = {k: [0, 0] for k in self.key}      # 딕셔너리의 벨류 값을 리스트 형태로 설정
         self.q_table[()] = [0, 0]
-        self.q_table[(0, 1, 0, 1, 0, 0)][0] = 1000
         self.eps = 0.9
 
     def select_action(self, s):
