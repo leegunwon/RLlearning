@@ -58,7 +58,6 @@ class QAgent():
 
         self.q_table = {k: [0, 0] for k in self.key} # 딕셔너리의 초기값을 0으로 설정
         self.q_table[()] = [0, 0]   
-        self.q_table[(0, 1, 0, 1, 0, 0)][0] = 1000   # 목표 지점의 가치를 1000으로 설정
         self.eps = 0.9
 
     def select_action(self, s):
