@@ -1,7 +1,10 @@
 import random
 import numpy as np
 import copy
+import itertools
+import plotly.express as px
 
+score = [[0, 0], [0, 0],[0, 0],[0, 0], [0, 0], [0, 0]]
 
 class GridWorld():
     def __init__(self):
@@ -41,22 +44,13 @@ class GridWorld():
 
 class QAgent():
     def __init__(self):
-        self.key = []         # 딕셔너리의 키 값 (나올 수 있는 경우의 수 모두 저장)
-        for i in range(2):
-            self.key.append(tuple([i]))
-            for j in range(2):
-                self.key.append(tuple([i, j]))
-                for k in range(2):
-                    self.key.append(tuple([i, j, k]))
-                    for l in range(2):
-                        self.key.append(tuple([i, j, k, l]))
-                        for m in range(2):
-                            self.key.append(tuple([i, j, k, l, m]))
-                            for n in range(2):
-                                self.key.append(tuple([i, j, k, l, m, n]))
+        self.key = []
+        for i in range(7):
+            self.key += list(itertools.product([0, 1], repeat=i))    # 딕셔너리의 키에 해당하는 리스트
+        self.key.append((0))
+        self.key.append((1))
 
         self.q_table = {k: [0, 0] for k in self.key}      # 딕셔너리의 벨류 값을 리스트 형태로 설정
-        self.q_table[()] = [0, 0]
         self.eps = 0.9
 
     def select_action(self, s):
@@ -96,7 +90,7 @@ def main():
     env = GridWorld()
     agent = QAgent()
 
-    for n_epi in range(10000):
+    for n_epi in range(3000):
         done = False
         s = env.reset()
 
@@ -107,10 +101,28 @@ def main():
             s = copy.deepcopy(s_prime)
 
         agent.anneal_eps()
-        print(s)
+       #  print(s)
     # agent.show_table()
+
+    score[0][0] += agent.q_table[()][0]
+    score[1][0] += agent.q_table[(0,)][0]
+    score[2][0] += agent.q_table[(0, 1)][0]
+    score[3][0] += agent.q_table[(0, 1, 0)][0]
+    score[4][0] += agent.q_table[(0, 1, 0, 1)][0]
+    score[5][0] += agent.q_table[(0, 1, 0, 1, 0)][0]
+    score[0][1] += agent.q_table[()][1]
+    score[1][1] += agent.q_table[(0,)][1]
+    score[2][1] += agent.q_table[(0, 1)][1]
+    score[3][1] += agent.q_table[(0, 1, 0)][1]
+    score[4][1] += agent.q_table[(0, 1, 0, 1)][1]
+    score[5][1] += agent.q_table[(0, 1, 0, 1, 0)][1]
 
 
 
 if __name__ == '__main__':
-    main()
+    for i in range(10):
+        main()
+    print(score)
+
+    fig = px.bar(x=['', '0', '01', '010', '0101', '01010'], y=[score[0][0]/10 - score[0][1]/10, score[1][0]/10- score[1][1]/10, score[2][0]/10- score[2][1]/10, score[3][0]/10 -score[3][1]/10, score[4][0]/10 - score[4][1]/10, score[5][0]/10- score[5][1]/10], color=['', '0', '01', '010', '0101', '01010'])
+    fig.show()
